@@ -4,9 +4,10 @@ FROM python:3.13-slim
 WORKDIR /app
 
 # Install system dependencies with Tencent Cloud mirror
-# Only install curl (for Node.js setup), remove gcc and gnupg as they're not needed at runtime
+# Install git (required for worktree feature) and curl (for Node.js setup)
 RUN sed -i 's/deb.debian.org/mirrors.tencent.com/g' /etc/apt/sources.list.d/debian.sources && \
     apt-get update && apt-get install -y --no-install-recommends \
+    git \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -39,6 +40,9 @@ RUN uv sync --no-dev
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data
+
+# Enable sandbox mode for Docker container (bypasses --dangerously-skip-permissions restrictions)
+ENV IS_SANDBOX=1
 
 # Expose port
 EXPOSE 8010
